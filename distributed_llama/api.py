@@ -845,5 +845,41 @@ def run_api_server(args: AppCliArgs):
         server.shutdown()
 
 
+def main():
+    import argparse
+    from .inference import AppCliArgs
+
+    parser = argparse.ArgumentParser(prog="dllama-api", description="OpenAI-compatible LLM API server")
+    parser.add_argument("--model", required=True, help="Path to model file")
+    parser.add_argument("--tokenizer", required=True, help="Path to tokenizer file")
+    parser.add_argument("--host", default="0.0.0.0", help="Bind host")
+    parser.add_argument("--port", type=int, default=8080, help="Bind port")
+    parser.add_argument("--nthreads", type=int, default=1, help="Number of threads")
+    parser.add_argument("--nbatches", type=int, default=32, help="Batch size for eval")
+    parser.add_argument("--max-seq-len", type=int, default=0, help="Max sequence length")
+    parser.add_argument("--buffer-float-type", default="q80", choices=["f32", "f16", "q40", "q80"])
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--topp", type=float, default=0.9)
+
+    args_ns = parser.parse_args()
+
+    from .quants import F_32, F_16, F_Q40, F_Q80
+    sync_map = {"f32": F_32, "f16": F_16, "q40": F_Q40, "q80": F_Q80}
+    cli_args = AppCliArgs()
+    cli_args.model_path = args_ns.model
+    cli_args.tokenizer_path = args_ns.tokenizer
+    cli_args.host = args_ns.host
+    cli_args.port = args_ns.port
+    cli_args.n_threads = args_ns.nthreads
+    cli_args.n_batches = args_ns.nbatches
+    cli_args.max_seq_len = args_ns.max_seq_len
+    cli_args.sync_type = sync_map.get(args_ns.buffer_float_type, F_Q80)
+    cli_args.seed = args_ns.seed
+    cli_args.temperature = args_ns.temperature
+    cli_args.topp = args_ns.topp
+    run_api_server(cli_args)
+
+
 if __name__ == "__main__":
     main()

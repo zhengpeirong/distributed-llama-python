@@ -26,7 +26,7 @@ def create_parser() -> argparse.ArgumentParser:
     def add_common_args(p):
         p.add_argument("--model", required=True, help="Path to model file")
         p.add_argument("--tokenizer", required=True, help="Path to tokenizer file")
-        p.add_argument("--buffer-float-type", default="f32",
+        p.add_argument("--buffer-float-type", default="q80",
                        choices=["f32", "f16", "q40", "q80"],
                        help="Float precision for sync buffers")
         p.add_argument("--workers", nargs="*", default=[],
