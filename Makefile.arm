@@ -1,0 +1,29 @@
+# Cross-compilation for Raspberry Pi (ARM64 / aarch64)
+# Requires: sudo apt install gcc-aarch64-linux-gnu python3-dev:arm64
+#
+# Usage:
+#   make -f Makefile.arm
+#   make -f Makefile.arm RPI_FEATURES=dotprod  # Pi 5 with dotprod
+
+CC      ?= aarch64-linux-gnu-gcc
+CFLAGS  ?= -O3 -fPIC -march=armv8-a+simd -mtune=cortex-a72
+# Pi 5 / Cortex-A76 with dotprod:
+ifeq ($(RPI_FEATURES),dotprod)
+  CFLAGS = -O3 -fPIC -march=armv8.2-a+simd+dotprod -mtune=cortex-a76
+endif
+
+PYTHON_INCLUDE ?= /usr/include/python3.10
+
+TARGET = distributed_llama/ops/_ops.arm.so
+
+all: $(TARGET)
+
+$(TARGET): distributed_llama/ops/ops.c
+	$(CC) $(CFLAGS) -I$(PYTHON_INCLUDE) \
+		-c distributed_llama/ops/ops.c -o /tmp/ops_arm.o
+	$(CC) -shared /tmp/ops_arm.o -o $(TARGET) -lpthread -lm
+	@echo "Built: $(TARGET)"
+	@echo "Copy to Pi: scp $(TARGET) pi@<host>:/path/to/distributed_llama/ops/_ops.cpython-*-aarch64-linux-gnu.so"
+
+clean:
+	rm -f $(TARGET) /tmp/ops_arm.o

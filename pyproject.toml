@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "distributed-llama-python"
+version = "0.1.0"
+description = "Distributed LLM inference in Python with C extensions — connect home devices into a powerful cluster to accelerate LLM inference"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.scripts]
+dllama = "distributed_llama.cli:main"
+dllama-api = "distributed_llama.api:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "fastapi",
+    "uvicorn",
+]
+
+[tool.setuptools]
+packages = [
+    "distributed_llama",
+    "distributed_llama.quants",
+    "distributed_llama.ops",
+    "distributed_llama.converter",
+]

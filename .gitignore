@@ -1,0 +1,31 @@
+# Build artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*.so
+
+# Claude
+.claude/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+*.egg
+.eggs/
+*.whl
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug / temp files
+_debug_*.py
+_test_*.py
+compare_output.py
+/tmp/
