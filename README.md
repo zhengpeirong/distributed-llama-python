@@ -115,7 +115,19 @@ Quantization: F32, F16, Q40 (4-bit), Q80 (8-bit).
 ## Constraints
 
 - Number of nodes must not exceed `n_kv_heads`
-- Q40 weights require Q80 sync type (`--buffer-float-type q80`)
+- Q40 weights require Q80 sync type
+
+## Known Limitations & TODOs
+
+- **Multi-threading is unsafe** (`--nthreads > 1`). The Q80×Q40 matmul fast path has a race condition where one thread sets `ctx.weight = None` while thread 0 still reads it. Use `--nthreads 1` for correct results.
+- Single-node and distributed modes may produce slightly different tokens due to floating-point accumulation order in batch vs sequential eval. Use `--temperature 0` with `--nbatches 32` for deterministic output matching C++.
+- Col-matmul weight distribution (`split_col_matmul_weight`) for WO and W2 is correct but uses indirect field access via `size.x`; should use direct fields (`d0`, `n0`) for consistency with C++ reference.
+- No GPU support — CPU-only inference.
+- `dllama chat` does not persist conversation history across restarts.
+
+## Credits
+
+This is a Python port of [distributed-llama](https://github.com/b4rtaz/distributed-llama) by Bartosz Taudul. The original C++ engine pioneered the tensor-parallel distributed inference approach, model format, and network protocol that this port builds on.
 
 ## License
 
